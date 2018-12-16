@@ -31,7 +31,6 @@ export const Brand = props => (
     <span className="brand-title">
       <Translate contentKey="global.title">Pragra Sample App for Deployment</Translate>
     </span>
-    
   </NavbarBrand>
 );
 
