@@ -62,7 +62,7 @@ spring:
         host: smtp.gmail.com
         port: 465
         username: info@bulsoft.com
-        password: 
+        password: P@ssw0rd11
     messages:
         cache-duration: PT1S # 1 second, see the ISO 8601 standard
     thymeleaf:
