@@ -1,46 +1,63 @@
 pipeline {
-    agent{
-        label 'node1'
+    agent any
+    environment {
+        APP_HOME='/home/app'
+        PRAGRA_BATCH='devs'
     }
-      triggers {
-            cron('* * * * *')
+    options { 
+        quietPeriod(30) 
     }
-    stages {
-       
-        //Stage to do checkout from scm
-        stage('Checkout'){
-            steps{
-                    git( branch : 'master', url: 'https://github.com/atinsingh/sample-java-app.git')    
-                    sh 'echo hello world'
-                }
-                
-        }
-        
-        //Stage to run maven clean
+    parameters { 
+            choice(name: 'ENV_TO_DEPLOY', 
+            choices: ['ST', 'UAT', 'STAGING'], description: 'Select a Env to deploy') 
 
-        stage('Clean') {
+             booleanParam(name: 'RUN', defaultValue: true, description: 'SELECT TO RUN')
+    }
+    triggers {
+        pollSCM('* * * * *')
+    }
+    tools{
+        maven  'm3'
+        jdk 'jdk8'
+    }
+
+    stages {
+        stage('Git CheckoutOut'){
+            environment{
+                GIT_REPO='https://github.com/atinsingh/sample-java-app.git'
+            }
             steps {
-                    sh 'chmod +x mvnw'
-                    sh './mvnw clean'
-                }
-            
-           
-            post {
-                failure {
-                    mail bcc: '', body: 'Some thing gone wrong in cleaning', cc: '', from: '', replyTo: '', subject: 'Check build', to: 'atin@pragra.co'
-                }
+                git "${GIT_REPO}"
             }
         }
-
         stage('Compile') {
             steps {
-              
-                 sh './mvnw compile'
-                
+                sh 'mvn compile'
             }
-           
         }
-        
+
+         stage('Unit Test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+
+         stage('Package') {
+            steps {
+                sh 'mvn package'
+            }
+        }
     }
-  
+
+    post {
+        always {
+            echo 'ALL GOOD '
+            echo "${BRANCH_NAME}  : ${JOB_NAME}"
+        }
+    }
+
+
 }
+
+
+// && 
